@@ -288,19 +288,19 @@
                     <div class="contact-form mt-5">
                         <div class="row">
                             <div class="col-lg-7 col-md-10 mx-auto">
-                                <form role="form" name="contactform" id="contactform">
+                                <form role="form" action="https://formspree.io/f/xyyrkwwr" method="POST" name="contactform" id="contactform">
                                     <div class="form-group">
                                         <label>Name</label>
-                                        <input type="text" class="form-control required" id="txtname" placeholder="Enter Name" name="name">
+                                        <input type="text" class="form-control required" id="txtname" placeholder="Enter Name" name="name" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Email</label>
-                                        <input type="text" class="form-control required" id="txtemail" placeholder="Enter Email" name="email">
+                                        <input type="text" class="form-control required" id="txtemail" placeholder="Enter Email" name="email" required>
                                     </div>
 
                                     <div class="form-group">
                                         <label>How can we help?</label>
-                                        <textarea name="issues" class="form-control required" id="txtmessage" cols="30" rows="7" placeholder="Enter Your Message Here"></textarea>
+                                        <textarea name="issues" class="form-control required" id="txtmessage" cols="30" rows="7" placeholder="Enter Your Message Here" required></textarea>
                                     </div>
                                     <center>
                                         <div id="message"></div>
@@ -401,6 +401,11 @@
 <script src="https://www.google.com/recaptcha/api.js?render=6LekOvMUAAAAAPiialf3Tb-ba_9UHvv4iDdp4dig"></script>
 
 <script>
+    window.onbeforeunload = () => {
+        for(const form of document.getElementsByTagName('#contactform')) {
+        form.reset();
+        }
+    }
     function Validation() {
         var valid = true;
         $(".required").each(function () {
@@ -422,17 +427,49 @@
     }
 
     $("#btnSend").click(function () {
+        var form = $("#contactform");
+        var status = $("#message");
          grecaptcha.execute('6LekOvMUAAAAAPiialf3Tb-ba_9UHvv4iDdp4dig', { action: 'technology' }).then(function (token) {
         if (Validation()) {
-
-            // document.getElementById("message").className = "btn btn-info";
-            // document.getElementById("message").innerHTML = "Please wait...";
-            setTimeout(function () {
-                document.getElementById("message").innerHTML = "Message has been sent successfully";
+            $.ajax({
+                type: form.attr("method"),
+                url: form.attr("action"),
+                data: form.serialize(),
+                dataType:"json",
+                success: function (response) {
+                    if (response.ok) {
+                        // status.html("Thanks for your submission!");
+                       
+                      
+                document.getElementById("message").innerHTML = "Thanks for your submission!";
                 document.getElementById("message").className = "btn btn-success";
                 $("#contactform input[type='text']").val('');
                 $("#contactform textarea").val('');
-            }, 2500);
+                setTimeout(function () {
+                    status.html('');
+                        status.removeClass("btn btn-success");
+                        }, 4000);
+                    } else {
+                        if (response.hasOwnProperty("errors")) {
+                            status.html(response.errors.map(error => error.message).join(", "));
+                            setTimeout(function () {
+                            status.html('');
+                        }, 4000);
+                        } else {
+                            status.html("Oops! There was a problem submitting your form");
+                            setTimeout(function () {
+                              status.html('');}, 4000);
+                        }
+                    }
+                },
+                error: function () {
+                    status.html("Oops! There was a problem submitting your form");
+                    setTimeout(function () {
+                              status.html('');}, 4000);
+                }
+            });
+            // document.getElementById("message").className = "btn btn-info";
+            // document.getElementById("message").innerHTML = "Please wait...";
             
         
         }

@@ -314,19 +314,19 @@
                     <div class="contact-form mt-5">
                         <div class="row">
                             <div class="col-lg-7 col-md-10 mx-auto">
-                                <form role="form" name="contactform" id="contactform">
+                                <form role="form" action="https://formspree.io/f/xyyrkwwr" method="POST" name="contactform" id="contactform">
                                     <div class="form-group">
                                         <label>Name</label>
-                                        <input type="text" class="form-control required bg-light" id="txtname" placeholder="Enter Name" name="name">
+                                        <input type="text" class="form-control required bg-light" id="txtname" placeholder="Enter Name" name="name" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Email</label>
-                                        <input type="email" class="form-control required bg-light" id="txtemail" placeholder="Enter Email" name="email">
+                                        <input type="email" class="form-control required bg-light" id="txtemail" placeholder="Enter Email" name="email" required>
                                     </div>
 
                                     <div class="form-group">
                                         <label>How can we help?</label>
-                                        <textarea name="issues" class="form-control required bg-light" id="txtmessage" cols="30" rows="7" placeholder="Enter Your Message Here"></textarea>
+                                        <textarea name="issues" class="form-control required bg-light" id="txtmessage" cols="30" rows="7" placeholder="Enter Your Message Here" required></textarea>
                                     </div>
                                     <center>
                                         <div id="message"></div>
@@ -350,24 +350,25 @@
             <br />
             <div class="services row">
                 <div class="col-xs-6 col-sm-6 col-xl-2 col-md-4 col-6">
-                    <a href="./website-development.html"><button type="button" class="btn btn-labeled btn-default service-style"> <img src="../assets/images/website-development.png" height="50px" alt="Website Development" /><br />Website<br />Development</button></a>&nbsp;
+                    <a href="./order-matching.html"><button type="button" class="btn btn-labeled btn-default service-style"> <img src="../assets/images/order-matching.png" height="50px" alt="Order Matching" /><br />Order<br />Matching</button></a>&nbsp;
                 </div>  <div class="col-xs-6 col-sm-6 col-xl-2 col-md-4 col-6">
-                    <a href="./mobile-app-development.html"><button type="button" class="btn btn-labeled btn-default service-style"><img src="../assets/images/mobile-app-development.png" height="50px" alt="Mobile App Development" /><br />Mobile App<br />Development</button></a>&nbsp;
+                    <a href="./social-media-development.html"><button type="button" class="btn btn-labeled btn-default service-style"><img src="../assets/images/social-media-development.png" height="50px" alt="Social Media Development" /><br />Social Media<br />Development</button></a>&nbsp;
                 </div>  <div class="col-xs-6 col-sm-6 col-xl-2 col-md-4 col-6">
                     <a href="./graphics-designing.html"><button type="button" class="btn btn-labeled btn-default service-style"><img src="../assets/images/graphics-designing.png" height="50px" alt="Graphics Designing" /><br />Graphics<br />Designing</button></a>&nbsp;
-                </div>  <div class="col-xs-6 col-sm-6 col-xl-2 col-md-4 col-6">
+                </div><div class="col-xs-6 col-sm-6 col-xl-2 col-md-4 col-6">
+                    <a href="./website-development.html"><button type="button" class="btn btn-labeled btn-default service-style"><img src="../assets/images/website-development.png" height="50px" alt="Website Development" /><br />Website<br />Development</button></a>&nbsp;
+                </div> <div class="col-xs-6 col-sm-6 col-xl-2 col-md-4 col-6">
                     <a href="./software-development.html"><button type="button" class="btn btn-labeled btn-default service-style"><img src="../assets/images/software-development.png" height="50px" alt="Software Development" /><br />Software<br />Development</button></a>&nbsp;
                 </div>  <div class="col-xs-6 col-sm-6 col-xl-2 col-md-4 col-6">
                     <a href="./cloud-services.html"><button type="button" class="btn btn-labeled btn-default service-style"><img src="../assets/images/cloud-services.png" height="50px" alt="Cloud Services" /><br />Cloud<br />Services</button></a>&nbsp;
-                </div>  <div class="col-xs-6 col-sm-6 col-xl-2 col-md-4 col-6">
-                    <a href="./helpline.html"><button type="button" class="btn btn-labeled btn-default service-style"><img src="../assets/images/helpline-call.png" height="50px" alt="Help Line" /><br /><br />Help Line<br /></button></a>&nbsp;
-                </div>
+                </div>  
             </div>
         </div>
     </div>
 </section>
 
 <script>
+
     function Validation() {
         var valid = true;
         $(".required").each(function () {
@@ -387,20 +388,56 @@
         });
         return valid
     }
-
     $("#btnSend").click(function () {
+        var form = $("#contactform");
+        var status = $("#message");
+        //  grecaptcha.execute('6LekOvMUAAAAAPiialf3Tb-ba_9UHvv4iDdp4dig', { action: 'technology' }).then(function (token) {
         if (Validation()) {
-            setTimeout(function () {
-                document.getElementById("message").innerHTML = "Message has been sent successfully";
+            $.ajax({
+                type: form.attr("method"),
+                url: form.attr("action"),
+                data: form.serialize(),
+                dataType:"json",
+                success: function (response) {
+                    if (response.ok) {
+                        // status.html("Thanks for your submission!");
+                       
+                
+                document.getElementById("message").innerHTML = "Thanks for your submission!";
                 document.getElementById("message").className = "btn btn-success";
                 $("#contactform input[type='text']").val('');
                 $("#contactform input[type='email']").val('');
                 $("#contactform textarea").val('');
-            }, 2500);
-            
+                setTimeout(function () {
+                    status.html('');
+                        status.removeClass("btn btn-success");
+                        }, 4000);
+                    } else {
+                        if (response.hasOwnProperty("errors")) {
+                            status.html(response.errors.map(error => error.message).join(", "));
+                            setTimeout(function () {
+                              status.html('');}, 4000);
+                        } else {
+                            status.html("Oops! There was a problem submitting your form");
+                            setTimeout(function () {
+                            status.html('');}, 4000);
+                            
+                        }
+                    }
+                },
+                error: function () {
+                    status.html("Oops! There was a problem submitting your form");
+                    setTimeout(function () {
+                    status.html('');
+                    }, 4000);
                 }
-        });
+            });
+            // document.getElementById("message").className = "btn btn-info";
+            // document.getElementById("message").innerHTML = "Please wait...";
+            
         
+        }
+});
     
 </script>
 
